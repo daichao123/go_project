@@ -4,7 +4,30 @@ import (
 	"fmt"
 )
 
+func NotRepeat(str string) int {
+	return 0
+}
+
+// IsListDuplicated 返回false 则没有重复 返回true 则重复
+func IsListDuplicated(list []string) bool {
+	tmpMap := make(map[string]int)
+
+	for _, value := range list {
+		tmpMap[value] = 1
+	}
+
+	var keys []interface{}
+	for k := range tmpMap {
+		keys = append(keys, k)
+	}
+	if len(keys) != len(list) {
+		return true
+	}
+	return false
+}
+
 func main() {
+	NotRepeat("abcabcdbb")
 	//fmt.Println("hello world")
 	//
 	//name := "test"
