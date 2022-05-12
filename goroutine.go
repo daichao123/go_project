@@ -6,46 +6,37 @@ import (
 )
 
 func main() {
-	chanA := make(chan int, 5)
-	chanB := make(chan int, 4)
-	chanB <- 1
-	chanB <- 2
-	chanB <- 3
-	chanB <- 4
-	chanC := make(chan int, 3)
-	chanC <- 1
-	chanC <- 2
-	chanC <- 3
-
-	go TaskA(chanA)
-	go TaskB(chanB)
-	go TaskC(chanC)
-
-	time.Sleep(time.Second * 10)
-
-	fmt.Println("test over !")
-}
-
-func TaskA(ch chan int) {
-	for {
-		fmt.Println("TaskA!!!")
-		time.Sleep(time.Second * 1)
-		ch <- 123
+	//1.定义一个管道，可放10个int类型的数据
+	intChan := make(chan int, 10)
+	for i := 0; i < 10; i++ {
+		intChan <- i
 	}
 
-}
-
-func TaskB(ch chan int) {
-	for {
-		fmt.Println("TaskB!!!")
-		<-ch
+	//2.定义一个管道，可以放5个string类型的数据
+	stringChan := make(chan string, 5)
+	for i := 0; i < 5; i++ {
+		stringChan <- "hello" + fmt.Sprintf("%d", i)
 	}
 
-}
+	//传统的方法遍历管道时，如果不关闭会阻塞而导致deadlock
 
-func TaskC(ch chan int) {
+	//在实际的开发中，我们不好确定什么时候该关闭管道！！！！
+	//这时可以用select方式可以解决
+	//label:
 	for {
-		fmt.Println("TaskC!!!")
-		<-ch
+		select {
+		//管道不关闭不会deadlock，会自动到下一个case匹配
+		case v := <-intChan:
+			fmt.Printf("从intChan读取的数据%d\n", v)
+			time.Sleep(time.Second)
+		case v := <-stringChan:
+			fmt.Printf("从stringChan读取的数据%d\n", v)
+			time.Sleep(time.Second)
+		default:
+			fmt.Printf("取不到数据。。。\n")
+			time.Sleep(time.Second)
+			return
+			//break label
+		}
 	}
 }
