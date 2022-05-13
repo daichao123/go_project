@@ -30,7 +30,7 @@ func main() {
 			fmt.Printf("从intChan读取的数据%d\n", v)
 			time.Sleep(time.Second)
 		case v := <-stringChan:
-			fmt.Printf("从stringChan读取的数据%d\n", v)
+			fmt.Printf("从stringChan读取的数据%s\n", v)
 			time.Sleep(time.Second)
 		default:
 			fmt.Printf("取不到数据。。。\n")
