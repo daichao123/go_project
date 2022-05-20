@@ -47,6 +47,7 @@ var catCount int64
 
 func main() {
 
+	//3个函数分别打印dog、fish、cat，要求每个函数都要起一个goroutine，按照dog、fish、cat顺序打印在屏幕上10次。
 	var wg sync.WaitGroup
 
 	dogCh := make(chan struct{}, 1)
