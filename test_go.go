@@ -89,7 +89,7 @@ func dog(wg *sync.WaitGroup, dogCh, fishCh chan struct{}) {
 
 func fish(wg *sync.WaitGroup, fishCh, catCh chan struct{}) {
 	for {
-		if fishCount >= 100 {
+		if fishCount >= int64(100) {
 			wg.Done()
 			return
 		}
@@ -102,7 +102,7 @@ func fish(wg *sync.WaitGroup, fishCh, catCh chan struct{}) {
 
 func cat(wg *sync.WaitGroup, catCh, dogCh chan struct{}) {
 	for {
-		if fishCount >= 100 {
+		if fishCount >= int64(100) {
 			wg.Done()
 			return
 		}
