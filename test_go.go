@@ -48,64 +48,27 @@ var catCount int64
 func main() {
 
 	//3个函数分别打印dog、fish、cat，要求每个函数都要起一个goroutine，按照dog、fish、cat顺序打印在屏幕上10次。
+
+	//使用等待组保持主协程和子协程同步完成
 	var wg sync.WaitGroup
 
+	//申明三个Channel 使用空结构体的原因是占用的内存空间大小为0，同时对于空结构体的组合，占用空间大小也为0：
 	dogCh := make(chan struct{}, 1)
 	fishCh := make(chan struct{}, 1)
 	catCh := make(chan struct{}, 1)
 
 	wg.Add(3)
+	//启用三个协程
 	go dog(&wg, dogCh, fishCh)
 	go fish(&wg, fishCh, catCh)
 	go cat(&wg, catCh, dogCh)
 
+	//向一个channel 写入数据
 	dogCh <- struct{}{}
 
+	//等待子协程完成任务
 	wg.Wait()
 	fmt.Println("main over")
-	//NotRepeat("abcabcdbb")
-	//var computerFist, userFist string
-	//computerNum := rand.New(rand.NewSource(123)).Intn(3)
-	//switch computerNum {
-	//case 0:
-	//	computerFist = "石头"
-	//case 1:
-	//	computerFist = "石头"
-	//case 2:
-	//	computerFist = "布"
-	//}
-	//fmt.Println("请出招:")
-	//fmt.Scan(&userFist)
-	//
-	//switch userFist {
-	//case "石头":
-	//	if computerFist == "石头" {
-	//		fmt.Println()
-	//	} else if computerFist == "布" {
-	//
-	//	} else if computerFist == "剪刀" {
-	//
-	//	}
-	//case "剪刀":
-	//	if computerFist == "石头" {
-	//		fmt.Println()
-	//	} else if computerFist == "布" {
-	//
-	//	} else if computerFist == "剪刀" {
-	//
-	//	}
-	//case "布":
-	//	if computerFist == "石头" {
-	//		fmt.Println()
-	//	} else if computerFist == "布" {
-	//
-	//	} else if computerFist == "剪刀" {
-	//
-	//	}
-	//default:
-	//	fmt.Println("正确的招式")
-	//}
-
 }
 
 func dog(wg *sync.WaitGroup, dogCh, fishCh chan struct{}) {
@@ -114,7 +77,10 @@ func dog(wg *sync.WaitGroup, dogCh, fishCh chan struct{}) {
 			wg.Done()
 			return
 		}
+		//输入channel 里面的数据
+		//如果此channel 里面没有数据 则会一直阻塞
 		<-dogCh
+		//原子操作
 		atomic.AddInt64(&dogCount, 1)
 		fmt.Println("dog")
 		fishCh <- struct{}{}
