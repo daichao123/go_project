@@ -53,6 +53,7 @@ func main() {
 	var wg sync.WaitGroup
 
 	//申明三个Channel 使用空结构体的原因是占用的内存空间大小为0，同时对于空结构体的组合，占用空间大小也为0：
+	//由于空结构体不占用空间，从节省内存的角度出发，适用于实现Set结构、在 channel 中传输信号等
 	dogCh := make(chan struct{}, 1)
 	fishCh := make(chan struct{}, 1)
 	catCh := make(chan struct{}, 1)
