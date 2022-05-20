@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"reflect"
+	"sync"
+	"sync/atomic"
 )
 
 func NotRepeat(str string) int {
@@ -40,28 +41,27 @@ type Car struct {
 	Tag   string
 }
 
-func main() {
-	goods := make([]interface{}, 0)
-	goods = append(goods, Cat{Name: "cat test", Type: "type test", Tag: "tag test"})
-	goods = append(goods, Car{Name: "car test", Price: 2300, Tag: "car tag test"})
-	fmt.Printf("goods : %s", goods)
-	for _, item := range goods {
-		//fmt.Print(reflect.ValueOf(item))
-		s := reflect.ValueOf(&item)
-		typeOfT := s.Type()
-		fmt.Printf("typeOFT:%s", typeOfT)
-		for i := 0; i < s.NumField(); i++ {
-			f := s.Field(i)
-			fmt.Printf("%d: %s %s = %v\n", i,
-				typeOfT.Field(i).Name, f.Type(), f.Interface())
-		}
-		//fmt.Printf(itemValue.Type())
-		//name := itemValue.FieldByName("Name")
-		//fmt.Print(name.Interface().(string))
-		//fmt.Printf(item.(string))
-		//fmt.Println("item", item.Name)
-	}
+var dogCount int64
+var fishCount int64
+var catCount int64
 
+func main() {
+
+	var wg sync.WaitGroup
+
+	dogCh := make(chan struct{}, 1)
+	fishCh := make(chan struct{}, 1)
+	catCh := make(chan struct{}, 1)
+
+	wg.Add(3)
+	go dog(&wg, dogCh, fishCh)
+	go fish(&wg, fishCh, catCh)
+	go cat(&wg, catCh, dogCh)
+
+	dogCh <- struct{}{}
+
+	wg.Wait()
+	fmt.Println("main over")
 	//NotRepeat("abcabcdbb")
 	//var computerFist, userFist string
 	//computerNum := rand.New(rand.NewSource(123)).Intn(3)
@@ -105,4 +105,43 @@ func main() {
 	//	fmt.Println("正确的招式")
 	//}
 
+}
+
+func dog(wg *sync.WaitGroup, dogCh, fishCh chan struct{}) {
+	for {
+		if dogCount >= int64(100) {
+			wg.Done()
+			return
+		}
+		<-dogCh
+		atomic.AddInt64(&dogCount, 1)
+		fmt.Println("dog")
+		fishCh <- struct{}{}
+	}
+}
+
+func fish(wg *sync.WaitGroup, fishCh, catCh chan struct{}) {
+	for {
+		if fishCount >= 100 {
+			wg.Done()
+			return
+		}
+		<-fishCh
+		atomic.AddInt64(&fishCount, 1)
+		fmt.Println("fish")
+		catCh <- struct{}{}
+	}
+}
+
+func cat(wg *sync.WaitGroup, catCh, dogCh chan struct{}) {
+	for {
+		if fishCount >= 100 {
+			wg.Done()
+			return
+		}
+		<-catCh
+		atomic.AddInt64(&catCount, 1)
+		fmt.Println("cat")
+		dogCh <- struct{}{}
+	}
 }
